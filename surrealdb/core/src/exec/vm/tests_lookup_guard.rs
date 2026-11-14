@@ -3,8 +3,8 @@
 //! it differently: in a read, a computed field, which is derived on each fetch, or a conditional
 //! `SELECT` permission a checked caller's fetch judges each time; in a write, any record, which the
 //! write may change between the two fetches. A field of an object reads the index in either. An
-//! event's body keys the lookup by a path into `$after` as a function body does by a path into its
-//! argument.
+//! event keys the lookup by a path into `$after`, and a field clause by a path into its record or
+//! by its `$value`, as a function body does by a path into its argument.
 //!
 //! Each test counts the keys a transaction reads while running one statement, on two
 //! datastores that differ only in how many records the looked-up table holds. A lookup reads the
@@ -20,7 +20,8 @@ use crate::kvs::TransactionType;
 use crate::kvs::request::QueryRequest;
 
 /// The schema: `item` is looked up by `k`; each function keys the lookup by one path into its
-/// record argument, and each event by one path into `$after`.
+/// record argument, each event by one path into `$after`, and each field clause by one path into
+/// its record or by its `$value`.
 const SCHEMA: &str = "
 	DEFINE ACCESS user ON DATABASE TYPE RECORD SIGNIN (SELECT * FROM user WHERE id = $id);
 	DEFINE TABLE user SCHEMALESS PERMISSIONS FULL;
@@ -72,6 +73,14 @@ const SCHEMA: &str = "
 	DEFINE EVENT bump ON ev_write WHEN true THEN {
 		UPDATE item SET n = 1 WHERE k = $after.k RETURN NONE;
 	};
+	DEFINE TABLE fv_record SCHEMALESS PERMISSIONS FULL;
+	DEFINE FIELD found ON fv_record VALUE (SELECT VALUE k FROM item WHERE k = $parent.k);
+	DEFINE TABLE fv_value SCHEMALESS PERMISSIONS FULL;
+	DEFINE FIELD k ON fv_value ASSERT (SELECT VALUE k FROM item WHERE k = $value) = [1];
+	DEFINE TABLE fv_linked SCHEMALESS PERMISSIONS FULL;
+	DEFINE FIELD found ON fv_linked VALUE (SELECT VALUE k FROM item WHERE k = $parent.r.k);
+	DEFINE TABLE fv_derived SCHEMALESS PERMISSIONS FULL;
+	DEFINE FIELD found ON fv_derived VALUE (SELECT VALUE k FROM item WHERE k = $parent.r.derived);
 	DEFINE TABLE ev_write_linked SCHEMALESS PERMISSIONS FULL;
 	DEFINE EVENT bump ON ev_write_linked WHEN true THEN {
 		UPDATE item SET n = 1 WHERE k = $after.r.k RETURN NONE;
@@ -160,4 +169,20 @@ async fn an_event_keys_the_lookup_by_its_images_as_a_function_by_its_arguments()
 	] {
 		assert!(!reads_the_index(&owner, sql).await, "{sql}: reads the index");
 	}
+}
+
+#[tokio::test]
+async fn a_field_clause_keys_the_lookup_by_its_values_as_a_function_by_its_arguments() {
+	let owner = TestDb::owner();
+	for sql in [
+		"CREATE fv_record SET k = 1 RETURN VALUE k",
+		"CREATE fv_value SET k = 1 RETURN VALUE k",
+		"CREATE fv_linked SET k = 1, r = cfg:one RETURN VALUE k",
+	] {
+		assert!(reads_the_index(&owner, sql).await, "{sql}: reads the table whole");
+	}
+	assert!(
+		!reads_the_index(&owner, "CREATE fv_derived SET k = 1, r = cfg:one RETURN VALUE k").await,
+		"a computed field behind a link: reads the index"
+	);
 }

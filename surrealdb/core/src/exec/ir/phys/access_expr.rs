@@ -408,10 +408,11 @@ fn computed_outside_clauses(ir: &Ir, value: ValueId) -> bool {
 	outside_clauses(ir, ir.enclosing_region(op))
 }
 
-/// Whether `value` is the variable of a `FOR` body, an argument of a function or closure body, or
-/// a value an event binds (its record, `$before`, `$after`, `$event`, `$input`), that no clause
-/// region encloses: it holds one value for every run of a statement the body holds, bound before
-/// the rows the statement's clauses judge.
+/// Whether `value` is the variable of a `FOR` body, an argument of a function or closure body, a
+/// value an event binds (its record, `$before`, `$after`, `$event`, `$input`), or a value a field
+/// clause binds (its record, and for `VALUE`, `DEFAULT` and `ASSERT` the field's value as `$value`
+/// or `$after`, `$before` and `$input`), that no clause region encloses: it holds one value for
+/// every run of a statement the body holds, bound before the rows the statement's clauses judge.
 fn bound_by_body(ir: &Ir, value: ValueId) -> bool {
 	let Some(ValueDef::BlockArg {
 		block,
@@ -431,6 +432,7 @@ fn bound_by_body(ir: &Ir, value: ValueId) -> bool {
 				| RegionKind::FunctionBody
 				| RegionKind::ClosureBody
 				| RegionKind::EventFrame
+				| RegionKind::FieldFrame(_)
 		)
 	}) && outside_clauses(ir, region)
 }
