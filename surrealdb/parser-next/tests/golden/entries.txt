@@ -234,7 +234,9 @@ e4f63bc0da6e09a6 language-tests/tests/bench/planner/runtime_operand_composite_ev
 8b52c32ee1315878 language-tests/tests/bench/planner/runtime_operand_composite_first.surql
 c29c3d4232d67868 language-tests/tests/bench/planner/runtime_operand_composite_last.surql
 09fe29ac5eb8205b language-tests/tests/bench/planner/runtime_operand_event_path.surql
+a9e495f9f50ab9fc language-tests/tests/bench/planner/runtime_operand_field_computed.surql
 a31da7aca6aff8ba language-tests/tests/bench/planner/runtime_operand_field_path.surql
+534806e7c2dc0b36 language-tests/tests/bench/planner/runtime_operand_field_value.surql
 3bf5b0dd84e0ad13 language-tests/tests/bench/planner/runtime_operand_update_path.surql
 8758c52d7778f73a language-tests/tests/bench/recursion/computed_field_select.surql
 873d11bb51882863 language-tests/tests/bench/recursion/dynamic_field_update.surql
@@ -449,7 +451,7 @@ f760b41c8a5c9777 language-tests/tests/bench/util/recursion-items-dynamic-1000.su
 a782ce89b03dc1bc language-tests/tests/bench/util/references-5000.surql
 de8172400ccee256 language-tests/tests/bench/util/runtime-operand-5000.surql
 5f45af375c021092 language-tests/tests/bench/util/runtime-operand-50000.surql
-bf4c24ec024b453f language-tests/tests/bench/util/runtime-operand.surql
+5d13d1d5b985a407 language-tests/tests/bench/util/runtime-operand.surql
 2332283a6544e320 language-tests/tests/bench/util/schemafull-record-table.surql
 780ed27b1ca4cf8c language-tests/tests/bench/vector/build_diskann_768.surql
 780ed27b1ca4cf8c language-tests/tests/bench/vector/build_diskann_768_20k.surql
@@ -2126,6 +2128,7 @@ d3addda1275284cc language-tests/tests/language/planner/explain_matrix/insert_rej
 802562f2e5a8e1ef language-tests/tests/language/planner/explain_matrix/residual_stripping.surql
 7e8cf8a0e636e0b4 language-tests/tests/language/planner/explain_matrix/update_rejects_with_index_after_set.surql
 c812a1474f020474 language-tests/tests/language/planner/fetch_with_limit_new_executor.surql
+aaf9a05218e07b93 language-tests/tests/language/planner/field_clause_values_read_the_index.surql
 464ae9b8399950a8 language-tests/tests/language/planner/filter_over_a_named_projection_keeps_its_rows.surql
 5b9ffc97a2477e86 language-tests/tests/language/planner/filter_over_a_subquery_keeps_its_rows.surql
 8558cdc3bd1fa107 language-tests/tests/language/planner/filter_over_a_subquery_reaches_its_source.surql
