@@ -29,5 +29,12 @@ value = "'OK'"
 	-- Each record written to `rt_src` updates the `item` whose `k` equals its own.
 	DEFINE TABLE rt_src SCHEMALESS;
 	DEFINE EVENT rt_bump ON rt_src WHEN true THEN { UPDATE item SET n = 1 WHERE k = $after.k RETURN NONE; };
+	-- Each record written to `rt_doc` resolves its `found` to the `item` whose `k` equals it.
+	DEFINE TABLE rt_doc SCHEMALESS;
+	DEFINE FIELD found ON rt_doc VALUE (SELECT VALUE id FROM item WHERE k = $value);
+	-- `rt_cdoc:one` derives its `found` from the `item` whose `k` equals its own on each read.
+	DEFINE TABLE rt_cdoc SCHEMALESS;
+	DEFINE FIELD found ON rt_cdoc COMPUTED (SELECT VALUE id FROM item WHERE k = $parent.k);
+	CREATE rt_cdoc:one SET k = 4321 RETURN NONE;
 	RETURN 'OK';
 }
